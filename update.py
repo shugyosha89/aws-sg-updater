@@ -9,6 +9,7 @@ __license__ = "MIT"
 
 from boto3 import Session
 from dotenv import load_dotenv
+import logging
 import logzero
 from logzero import logger
 import requests
@@ -21,12 +22,16 @@ SCRIPT_DIR = pathlib.Path(__file__).parent.absolute()
 def configure_logging():
     if log_file := os.environ.get('LOG_FILE'):
         logzero.logfile(log_file)
+    if log_level := os.environ.get('LOG_LEVEL'):
+        logzero.loglevel(logging.getLevelName(log_level.upper()))
 
 def update(ip):
-    with open('rules.yml', 'r') as file:
+    with open(f'{SCRIPT_DIR}/rules.yml', 'r') as file:
         rules = yaml.safe_load(file)
     for profile, regions in rules.items():
+        logger.debug(f"Using profile {profile}")
         for region, groups in regions.items():
+            logger.debug(f"Using region {region}")
             session = Session(profile_name=profile, region_name=region)
             client = session.client('ec2')
             for sg_id, sg_rules in groups.items():
@@ -38,11 +43,12 @@ def update(ip):
                             'FromPort': rule['port'],
                             'ToPort': rule['port'],
                             'CidrIpv4': f'{ip}/32',
-                            'Description': os.environ.get('DESCRIPTION', ''),
+                            'Description': os.environ.get('SGR_DESCRIPTION', ''),
                         }
                     }
                     for rule_id, rule in sg_rules.items()
                 ]
+                logger.debug(f'Updating {sg_id} on {profile} in {region} with {rules}')
                 try:
                     client.modify_security_group_rules(GroupId=sg_id, SecurityGroupRules=rules)
                 except Exception as e:

@@ -1,0 +1,21 @@
+my-aws-profile:
+  ap-northeast-1:
+    sg-0008e42c39dc5a6cf:
+      sgr-03b187f24663aecc6:
+        protocol: 'tcp'
+        port: 943
+      sgr-023c7e39175d4af57:
+        protocol: 'udp'
+        port: 1194
+
+another-aws-profile:
+  us-east-1:
+    sg-0008e42c3ffc5a6cf:
+      sgr-0f76ca37da78f76014:
+        protocol: 'tcp'
+        port: 22
+  us-west-1:
+    sg-0238e42c3ffc5a6cd:
+      sgr-0f76ca37da78f7a021:
+        protocol: 'tcp'
+        port: 22
